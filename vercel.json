@@ -27,5 +27,6 @@
     "env": {
       "VERCEL_DEBUG": "true"
     }
-  }
+  },
+  "buildCommand": "./build.sh"
 }
