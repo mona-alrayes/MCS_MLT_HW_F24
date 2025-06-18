@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Loan Prediction System{% endblock %}</title>
+    <!-- Security headers -->
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+
+    <!-- Static assets - fixed path for Vercel -->
+    <link rel="stylesheet" href="/static/style.css">
+
+    <!-- Block for page-specific styles -->
+    {% block styles %}{% endblock %}
+</head>
+
+<body>
+    <!-- Skip link for accessibility -->
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <header>
+        <h1>Loan Prediction System</h1>
+        <nav>
+            <a href="/">Home</a>
+            <a href="/apply">Apply</a>
+            <a href="/eda-report">EDA Report</a>
+            {% if current_user and current_user.user_metadata.is_admin %}
+            <a href="/admin/dashboard">Dashboard</a>
+            <a href="/admin/logout">Logout</a>
+            {% else %}
+            <a href="/admin/login">Admin Login</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <main id="main-content">
+        <!-- Flash messages display -->
+        {% if request.session.get('flash_message') %}
+        <div class="flash-message {{ request.session.get('flash_type', 'info') }}">
+            {{ request.session.get('flash_message') }}
+        </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <p aria-label="Copyright">© {{ current_year }} Loan Prediction System</p>
+        <p>Secured by Supabase | Deployed on Vercel</p>
+    </footer>
+
+    <!-- CSRF token for forms -->
+    <input type="hidden" id="csrf_token" value="{{ request.session.get('csrf_token', '') }}">
+
+    <!-- Base scripts -->
+    <script>
+        // Initialize Supabase token management
+        document.addEventListener('DOMContentLoaded', function () {
+            // Set CSRF token in all forms
+            const csrfToken = document.getElementById('csrf_token').value;
+            document.querySelectorAll('form').forEach(form => {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'csrf_token';
+                input.value = csrfToken;
+                form.appendChild(input);
+            });
+
+            // Set Supabase token in localStorage
+            const accessToken = "{{ request.session.get('access_token', '') }}";
+            if (accessToken) {
+                localStorage.setItem('supabase_token', accessToken);
+            }
+
+            // Focus management for skip link
+            document.querySelector('.skip-link')?.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.getElementById('main-content').focus();
+            });
+        });
+        // Add this to your script block
+        document.addEventListener('DOMContentLoaded', function () {
+            // Clear flash messages after 5 seconds
+            setTimeout(() => {
+                const flash = document.querySelector('.flash-message');
+                if (flash) flash.style.display = 'none';
+            }, 5000);
+        });
+    </script>
+
+    <!-- Block for page-specific scripts -->
+    {% block scripts %}{% endblock %}
+
+    <!-- Vercel Analytics -->
+    <script>
+        if (window.vercel) {
+            window.vercel.track('pageview');
+        }
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,388 @@
+{% extends "base.html" %}
+
+{% block title %}Application Result - Loan Prediction System{% endblock %}
+
+{% block styles %}
+<style>
+    .result-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+    
+    .result-header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .result-card {
+        border-radius: 16px;
+        padding: 2.5rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        margin-bottom: 2.5rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .result-card.approved {
+        background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+        border: 1px solid #86efac;
+    }
+    
+    .result-card.rejected {
+        background: linear-gradient(135deg, #fee2e2, #fecaca);
+        border: 1px solid #fca5a5;
+    }
+    
+    .result-icon {
+        font-size: 4rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .result-card.approved .result-icon {
+        color: #16a34a;
+    }
+    
+    .result-card.rejected .result-icon {
+        color: #dc2626;
+    }
+    
+    .result-status {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+    
+    .result-card.approved .result-status {
+        color: #166534;
+    }
+    
+    .result-card.rejected .result-status {
+        color: #7f1d1d;
+    }
+    
+    .confidence-meter {
+        height: 12px;
+        background: rgba(255, 255, 255, 0.5);
+        border-radius: 6px;
+        margin: 1.5rem auto;
+        max-width: 400px;
+        overflow: hidden;
+    }
+    
+    .confidence-fill {
+        height: 100%;
+        border-radius: 6px;
+    }
+    
+    .approved .confidence-fill {
+        background: linear-gradient(90deg, #22c55e, #16a34a);
+    }
+    
+    .rejected .confidence-fill {
+        background: linear-gradient(90deg, #ef4444, #b91c1c);
+    }
+    
+    .confidence-value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin: 0.5rem 0;
+    }
+    
+    .result-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+        background: rgba(255, 255, 255, 0.5);
+        padding: 1.5rem;
+        border-radius: 12px;
+        text-align: left;
+    }
+    
+    .detail-item {
+        padding: 0.5rem 0;
+    }
+    
+    .detail-label {
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 0.3rem;
+        font-size: 0.95rem;
+    }
+    
+    .detail-value {
+        font-weight: 500;
+        font-size: 1.1rem;
+    }
+    
+    .metrics-section {
+        margin-bottom: 2.5rem;
+    }
+    
+    .section-title {
+        text-align: center;
+        margin-bottom: 1.5rem;
+        position: relative;
+    }
+    
+    .section-title:after {
+        content: '';
+        display: block;
+        width: 80px;
+        height: 3px;
+        background: #2563eb;
+        margin: 0.8rem auto 0;
+        border-radius: 3px;
+    }
+    
+    .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .metric-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.8rem;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        border: 1px solid #e2e8f0;
+    }
+    
+    .metric-card h3 {
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+        color: #1e40af;
+        text-align: center;
+    }
+    
+    .metric-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.8rem 0;
+        border-bottom: 1px dashed #e2e8f0;
+    }
+    
+    .metric-row:last-child {
+        border-bottom: none;
+    }
+    
+    .metric-label {
+        font-weight: 500;
+        color: #475569;
+    }
+    
+    .metric-value {
+        font-weight: 600;
+        color: #1e293b;
+    }
+    
+    .report-card {
+        background: #dbeafe;
+        border-radius: 12px;
+        padding: 1.5rem;
+        text-align: center;
+        margin-top: 1.5rem;
+    }
+    
+    .report-card h4 {
+        margin-top: 0;
+        margin-bottom: 1rem;
+        color: #1e40af;
+    }
+    
+    .btn-report {
+        display: inline-block;
+        background: #1e40af;
+        color: white;
+        padding: 0.8rem 2rem;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: background 0.3s;
+    }
+    
+    .btn-report:hover {
+        background: #1d4ed8;
+    }
+    
+    .actions {
+        display: flex;
+        justify-content: center;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+        margin-top: 2rem;
+    }
+    
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.9rem 2rem;
+        border-radius: 8px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s;
+        min-width: 200px;
+        justify-content: center;
+        gap: 0.7rem;
+    }
+    
+    .btn-primary {
+        background: #2563eb;
+        color: white;
+        border: 1px solid #1d4ed8;
+    }
+    
+    .btn-primary:hover {
+        background: #1d4ed8;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(29, 78, 216, 0.3);
+    }
+    
+    .btn-secondary {
+        background: white;
+        color: #2563eb;
+        border: 1px solid #2563eb;
+    }
+    
+    .btn-secondary:hover {
+        background: #dbeafe;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(37, 99, 235, 0.2);
+    }
+    
+    @media (max-width: 576px) {
+        .result-card {
+            padding: 1.5rem;
+        }
+        
+        .actions {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .btn {
+            width: 100%;
+            max-width: 300px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="result-container">
+    <div class="result-header">
+        <h2>Your Loan Application Result</h2>
+        <p>Review your application details and prediction results</p>
+    </div>
+    
+    <div class="result-card {% if application.prediction == 'Approved' %}approved{% else %}rejected{% endif %}">
+        <div class="result-icon">
+            {% if application.prediction == 'Approved' %}✓{% else %}✗{% endif %}
+        </div>
+        
+        <div class="result-status">
+            {{ application.prediction }}
+        </div>
+        
+        <div class="confidence-value">
+            {{ (application.probability * 100)|round(2) }}% Confidence
+        </div>
+        
+        <div class="confidence-meter">
+            <div class="confidence-fill" style="width: {{ application.probability * 100 }}%"></div>
+        </div>
+        
+        <div class="result-details">
+            <div class="detail-item">
+                <div class="detail-label">Application ID</div>
+                <div class="detail-value">#{{ application.id }}</div>
+            </div>
+            
+            <div class="detail-item">
+                <div class="detail-label">Applicant Name</div>
+                <div class="detail-value">{{ application.applicant_name }}</div>
+            </div>
+            
+            <div class="detail-item">
+                <div class="detail-label">Loan Amount</div>
+                <div class="detail-value">${{ application.loan_amount|round(2) }}</div>
+            </div>
+            
+            <div class="detail-item">
+                <div class="detail-label">Loan Term</div>
+                <div class="detail-value">{{ application.loan_amount_term }} months</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="metrics-section">
+        <h3 class="section-title">Model Performance Metrics</h3>
+        
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <h3>Best Model Performance</h3>
+                <div class="metric-row">
+                    <span class="metric-label">Accuracy:</span>
+                    <span class="metric-value">{{ (metrics.accuracy * 100)|round(2) }}%</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Precision:</span>
+                    <span class="metric-value">{{ (metrics.precision * 100)|round(2) }}%</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Recall:</span>
+                    <span class="metric-value">{{ (metrics.recall * 100)|round(2) }}%</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">F1 Score:</span>
+                    <span class="metric-value">{{ (metrics.f1_score * 100)|round(2) }}%</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Last Updated:</span>
+                    <span class="metric-value">{{ metrics.last_updated.strftime('%Y-%m-%d') }}</span>
+                </div>
+            </div>
+            
+            <div class="metric-card">
+                <h3>Random Forest Model</h3>
+                <div class="metric-row">
+                    <span class="metric-label">Accuracy:</span>
+                    <span class="metric-value">{{ (metrics.rf_accuracy * 100)|round(2) }}%</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Precision:</span>
+                    <span class="metric-value">{{ (metrics.rf_precision * 100)|round(2) }}%</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">Recall:</span>
+                    <span class="metric-value">{{ (metrics.rf_recall * 100)|round(2) }}%</span>
+                </div>
+                <div class="metric-row">
+                    <span class="metric-label">F1 Score:</span>
+                    <span class="metric-value">{{ (metrics.rf_f1 * 100)|round(2) }}%</span>
+                </div>
+                
+                <div class="report-card">
+                    <h4>Detailed Analysis Report</h4>
+                    <p>Explore our comprehensive data analysis</p>
+                    <a href="/eda-report" target="_blank" class="btn-report">
+                        View EDA Report
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="actions">
+        <a href="/" class="btn btn-primary">
+            <span>🏠</span> Back to Home
+        </a>
+        <a href="/apply" class="btn btn-secondary">
+            <span>📝</span> Submit New Application
+        </a>
+    </div>
+</div>
+{% endblock %}

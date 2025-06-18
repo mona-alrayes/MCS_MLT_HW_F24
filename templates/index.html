@@ -1,0 +1,298 @@
+{% extends "base.html" %}
+
+{% block title %}AI-Powered Loan Prediction System{% endblock %}
+
+{% block styles %}
+<style>
+    /* Home page specific styles */
+    :root {
+        --primary: #2563eb;
+        --primary-dark: #1d4ed8;
+        --secondary: #475569;
+        --light: #f8fafc;
+        --dark: #0f172a;
+        --success: #10b981;
+        --error: #ef4444;
+    }
+    
+    .hero {
+        background: linear-gradient(135deg, #1e40af 0%, #0ea5e9 100%);
+        color: white;
+        padding: 5rem 1rem;
+        text-align: center;
+    }
+    
+    .hero-content {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .hero h1 {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+    }
+    
+    .hero p {
+        font-size: 1.25rem;
+        margin-bottom: 2rem;
+        opacity: 0.9;
+    }
+    
+    .cta-button {
+        display: inline-block;
+        background-color: white;
+        color: var(--primary-dark);
+        padding: 0.8rem 2rem;
+        border-radius: 50px;
+        font-weight: bold;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        font-size: 1.1rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .cta-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        background-color: #e0f2fe;
+    }
+    
+    .features {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        padding: 4rem 1rem;
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    
+    .feature-card {
+        background: white;
+        border-radius: 10px;
+        padding: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        transition: transform 0.3s ease;
+        border: 1px solid #e2e8f0;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .feature-card h2 {
+        color: var(--primary);
+        margin-bottom: 1rem;
+    }
+    
+    .how-it-works {
+        background-color: #f1f5f9;
+        padding: 4rem 1rem;
+        text-align: center;
+    }
+    
+    .how-it-works h2 {
+        color: var(--dark);
+        margin-bottom: 2rem;
+        font-size: 2rem;
+    }
+    
+    .how-it-works ol {
+        max-width: 600px;
+        margin: 0 auto 3rem;
+        text-align: left;
+        counter-reset: step-counter;
+    }
+    
+    .how-it-works li {
+        margin-bottom: 1.5rem;
+        padding-left: 3rem;
+        position: relative;
+        font-size: 1.1rem;
+        line-height: 1.6;
+    }
+    
+    .how-it-works li:before {
+        counter-increment: step-counter;
+        content: counter(step-counter);
+        position: absolute;
+        left: 0;
+        top: 0;
+        background: var(--primary);
+        color: white;
+        width: 2rem;
+        height: 2rem;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+    }
+    
+    .cta-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1rem;
+    }
+    
+    .secondary-button {
+        display: inline-block;
+        background-color: transparent;
+        color: var(--primary);
+        border: 2px solid var(--primary);
+        padding: 0.8rem 2rem;
+        border-radius: 50px;
+        font-weight: bold;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+    
+    .secondary-button:hover {
+        background-color: var(--primary);
+        color: white;
+    }
+    
+    .stats-container {
+        display: flex;
+        justify-content: center;
+        gap: 3rem;
+        padding: 3rem 1rem;
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+    
+    .stat-card {
+        text-align: center;
+    }
+    
+    .stat-value {
+        font-size: 3rem;
+        font-weight: bold;
+        color: var(--primary);
+    }
+    
+    .stat-label {
+        font-size: 1.1rem;
+        color: var(--secondary);
+    }
+    
+    @media (max-width: 768px) {
+        .hero {
+            padding: 3rem 1rem;
+        }
+        
+        .hero h1 {
+            font-size: 2.2rem;
+        }
+        
+        .features {
+            grid-template-columns: 1fr;
+            padding: 2rem 1rem;
+        }
+        
+        .how-it-works {
+            padding: 2rem 1rem;
+        }
+        
+        .stats-container {
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-content">
+        <h1>AI-Powered Loan Prediction</h1>
+        <p>Get instant loan approval predictions with our machine learning system</p>
+        <a href="/apply" class="cta-button">Apply Now</a>
+    </div>
+</section>
+
+<section class="stats-container">
+    <div class="stat-card">
+        <div class="stat-value">{{ total_applications }}+</div>
+        <div class="stat-label">Applications Processed</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ accuracy }}%</div>
+        <div class="stat-label">Prediction Accuracy</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value">{{ approval_rate }}%</div>
+        <div class="stat-label">Approval Rate</div>
+    </div>
+</section>
+
+<section class="features">
+    <div class="feature-card">
+        <h2>Fast Predictions</h2>
+        <p>Get loan approval predictions in seconds using our advanced AI models trained on thousands of historical loan applications.</p>
+    </div>
+    <div class="feature-card">
+        <h2>Secure Processing</h2>
+        <p>Your financial data is protected with bank-level encryption and security protocols powered by Supabase's secure infrastructure.</p>
+    </div>
+    <div class="feature-card">
+        <h2>Transparent Results</h2>
+        <p>Understand your approval chances with clear probability scores and factors influencing the decision.</p>
+    </div>
+</section>
+
+<section class="how-it-works">
+    <h2>How It Works</h2>
+    <ol>
+        <li>Fill out our simple application form with your financial details</li>
+        <li>Our AI analyzes your profile using machine learning algorithms</li>
+        <li>Receive an instant prediction of your loan approval status</li>
+        <li>Get a detailed explanation of factors affecting the decision</li>
+    </ol>
+    <div class="cta-container">
+        <a href="/apply" class="cta-button">Start Your Application</a>
+        <a href="/eda-report" class="secondary-button">View Analysis Report</a>
+    </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Animation for stats counting
+        const statElements = document.querySelectorAll('.stat-value');
+        statElements.forEach(el => {
+            const target = parseInt(el.textContent);
+            let count = 0;
+            const duration = 2000; // ms
+            const increment = target / (duration / 16);
+            
+            const updateCount = () => {
+                count += increment;
+                if (count < target) {
+                    el.textContent = Math.ceil(count) + '+';
+                    requestAnimationFrame(updateCount);
+                } else {
+                    el.textContent = target + '+';
+                }
+            };
+            
+            updateCount();
+        });
+        
+        // Feature card animation
+        const featureCards = document.querySelectorAll('.feature-card');
+        featureCards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            
+            setTimeout(() => {
+                card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, 300 * index);
+        });
+    });
+</script>
+{% endblock %}

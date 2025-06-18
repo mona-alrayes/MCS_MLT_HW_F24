@@ -1,0 +1,623 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - Loan Prediction System{% endblock %}
+
+{% block styles %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/charts.css/dist/charts.min.css">
+<style>
+    .dashboard-container {
+        max-width: 1800px;
+        margin: 1rem auto;
+        padding: 0 1rem;
+    }
+    
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .welcome-message {
+        color: #475569;
+        margin-top: 0.5rem;
+    }
+    
+    .metrics-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .metric-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e2e8f0;
+        transition: transform 0.3s ease;
+    }
+    
+    .metric-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+    }
+    
+    .metric-title {
+        font-size: 1.1rem;
+        color: #64748b;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+    }
+    
+    .metric-title i {
+        margin-right: 0.5rem;
+        font-size: 1.2rem;
+    }
+    
+    .metric-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        line-height: 1;
+    }
+    
+    .metric-change {
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+    }
+    
+    .metric-change.positive {
+        color: #10b981;
+    }
+    
+    .metric-change.negative {
+        color: #ef4444;
+    }
+    
+    .metric-extra {
+        font-size: 0.9rem;
+        color: #64748b;
+        margin-top: 0.5rem;
+    }
+    
+    .stat-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e2e8f0;
+        text-align: center;
+    }
+    
+    .stat-card h3 {
+        margin-top: 0;
+        font-size: 1.1rem;
+        color: #64748b;
+        margin-bottom: 1rem;
+    }
+    
+    .stat-value {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-card.approved {
+        border-top: 4px solid #10b981;
+    }
+    
+    .stat-card.rejected {
+        border-top: 4px solid #ef4444;
+    }
+    
+    .stat-card.pending {
+        border-top: 4px solid #f59e0b;
+    }
+    
+    .stat-card.total {
+        border-top: 4px solid #3b82f6;
+    }
+    
+    .chart-container {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e2e8f0;
+        margin-bottom: 2rem;
+    }
+    
+    .chart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+    
+    .chart-title {
+        margin: 0;
+        color: #1e293b;
+    }
+    
+    .chart-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .time-filter {
+        background: #f1f5f9;
+        border: none;
+        border-radius: 6px;
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+    
+    .table-container {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e2e8f0;
+        overflow-x: auto;
+    }
+    
+    .applications-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .applications-table th {
+        text-align: left;
+        padding: 1rem;
+        background: #f8fafc;
+        color: #64748b;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .applications-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #e2e8f0;
+        color: #475569;
+    }
+    
+    .applications-table tr:hover td {
+        background: #f8fafc;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 0.35rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+    
+    .status-pending {
+        background-color: #fef3c7;
+        color: #d97706;
+    }
+    
+    .status-approved {
+        background-color: #dcfce7;
+        color: #15803d;
+    }
+    
+    .status-rejected {
+        background-color: #fee2e2;
+        color: #b91c1c;
+    }
+    
+    .prediction-badge {
+        display: inline-block;
+        padding: 0.35rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+    
+    .prediction-approved {
+        background-color: #dbeafe;
+        color: #1d4ed8;
+    }
+    
+    .prediction-rejected {
+        background-color: #ede9fe;
+        color: #7e22ce;
+    }
+    
+    .actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .btn {
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .btn-view {
+        background: #dbeafe;
+        color: #1d4ed8;
+        border: 1px solid #bfdbfe;
+    }
+    
+    .btn-view:hover {
+        background: #bfdbfe;
+    }
+    
+    .btn-delete {
+        background: #fee2e2;
+        color: #b91c1c;
+        border: 1px solid #fecaca;
+    }
+    
+    .btn-delete:hover {
+        background: #fecaca;
+    }
+    
+    .btn i {
+        margin-right: 0.3rem;
+    }
+    
+    .pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 1.5rem;
+        gap: 0.5rem;
+    }
+    
+    .pagination-button {
+        padding: 0.5rem 0.8rem;
+        border-radius: 6px;
+        background: #e2e8f0;
+        color: #475569;
+        border: none;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    
+    .pagination-button.active {
+        background: #3b82f6;
+        color: white;
+    }
+    
+    .pagination-button:hover:not(.active) {
+        background: #cbd5e1;
+    }
+    
+    .data-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .search-container {
+        position: relative;
+    }
+    
+    .search-input {
+        padding: 0.7rem 1rem 0.7rem 2.5rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        width: 250px;
+    }
+    
+    .search-icon {
+        position: absolute;
+        left: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+    }
+    
+    .export-button {
+        background: #10b981;
+        color: white;
+        padding: 0.7rem 1.5rem;
+        border: none;
+        border-radius: 6px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .export-button:hover {
+        background: #059669;
+    }
+    
+    /* Charts.css customization */
+    .charts-css {
+        height: 300px;
+        margin-top: 1rem;
+    }
+    
+    @media (max-width: 1200px) {
+        .metrics-container {
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .dashboard-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .stat-cards {
+            grid-template-columns: 1fr 1fr;
+        }
+        
+        .search-input {
+            width: 100%;
+        }
+    }
+    
+    @media (max-width: 576px) {
+        .stat-cards {
+            grid-template-columns: 1fr;
+        }
+        
+        .metrics-container {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <div>
+            <h2>Admin Dashboard</h2>
+            <p class="welcome-message">Welcome back, {{ current_user.user.email }}</p>
+        </div>
+        <div>
+            <span class="metric-extra">Last updated: {{ metrics.last_updated.strftime('%Y-%m-%d %H:%M') }}</span>
+        </div>
+    </div>
+    
+    <!-- Model Metrics Summary -->
+    <div class="metrics-container">
+        <div class="metric-card">
+            <div class="metric-title">
+                <i>📊</i> Best Model Accuracy
+            </div>
+            <div class="metric-value">{{ (metrics.accuracy * 100)|round(1) }}%</div>
+            <div class="metric-change positive">
+                <span>+2.4% from last month</span>
+            </div>
+        </div>
+        
+        <div class="metric-card">
+            <div class="metric-title">
+                <i>⚖️</i> Model Precision
+            </div>
+            <div class="metric-value">{{ (metrics.precision * 100)|round(1) }}%</div>
+            <div class="metric-change positive">
+                <span>+1.8% from last month</span>
+            </div>
+        </div>
+        
+        <div class="metric-card">
+            <div class="metric-title">
+                <i>🔍</i> Model Recall
+            </div>
+            <div class="metric-value">{{ (metrics.recall * 100)|round(1) }}%</div>
+            <div class="metric-change negative">
+                <span>-0.6% from last month</span>
+            </div>
+        </div>
+        
+        <div class="metric-card">
+            <div class="metric-title">
+                <i>🎯</i> Model F1 Score
+            </div>
+            <div class="metric-value">{{ (metrics.f1_score * 100)|round(1) }}%</div>
+            <div class="metric-change positive">
+                <span>+1.2% from last month</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Application Statistics -->
+    <div class="stat-cards">
+        <div class="stat-card total">
+            <h3>Total Applications</h3>
+            <div class="stat-value">{{ applications|length }}</div>
+            <div class="metric-extra">{{ new_applications_today }} new today</div>
+        </div>
+        
+        <div class="stat-card approved">
+            <h3>Approved Applications</h3>
+            <div class="stat-value">{{ applications|selectattr('status', 'equalto', 'Approved')|list|length }}</div>
+            <div class="metric-extra">{{ (approval_rate)|round(1) }}% approval rate</div>
+        </div>
+        
+        <div class="stat-card rejected">
+            <h3>Rejected Applications</h3>
+            <div class="stat-value">{{ applications|selectattr('status', 'equalto', 'Rejected')|list|length }}</div>
+            <div class="metric-extra">{{ (rejection_rate)|round(1) }}% rejection rate</div>
+        </div>
+        
+        <div class="stat-card pending">
+            <h3>Pending Review</h3>
+            <div class="stat-value">{{ applications|selectattr('status', 'equalto', 'Pending')|list|length }}</div>
+            <div class="metric-extra">{{ pending_percentage|round(1) }}% of total</div>
+        </div>
+    </div>
+    
+    <!-- Application Trends Chart -->
+    <div class="chart-container">
+        <div class="chart-header">
+            <h3 class="chart-title">Application Trends</h3>
+            <div class="chart-actions">
+                <select class="time-filter">
+                    <option>Last 7 days</option>
+                    <option selected>Last 30 days</option>
+                    <option>Last 90 days</option>
+                </select>
+            </div>
+        </div>
+        
+        <table class="charts-css column show-labels data-spacing-10">
+            <caption>Applications by Status Over Time</caption>
+            <thead>
+                <tr>
+                    <th scope="col">Date</th>
+                    <th scope="col">Approved</th>
+                    <th scope="col">Rejected</th>
+                    <th scope="col">Pending</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for date, counts in application_trends.items() %}
+                <tr>
+                    <th scope="row">{{ date }}</th>
+                    <td style="--size: {{ counts.approved / max_applications }};"><span class="data">{{ counts.approved }}</span></td>
+                    <td style="--size: {{ counts.rejected / max_applications }};"><span class="data">{{ counts.rejected }}</span></td>
+                    <td style="--size: {{ counts.pending / max_applications }};"><span class="data">{{ counts.pending }}</span></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Applications Table -->
+    <div class="table-container">
+        <div class="data-actions">
+            <div class="search-container">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-input" placeholder="Search applications..." id="searchInput">
+            </div>
+            <button class="export-button">
+                <i>📥</i> Export Data
+            </button>
+        </div>
+        
+        <table class="applications-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Applicant</th>
+                    <th>Loan Amount</th>
+                    <th>Status</th>
+                    <th>Prediction</th>
+                    <th>Confidence</th>
+                    <th>Date</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for app in applications %}
+                <tr>
+                    <td>{{ app.id }}</td>
+                    <td>{{ app.applicant_name }}</td>
+                    <td>${{ app.loan_amount|round(2) }}</td>
+                    <td>
+                        <span class="status-badge status-{{ app.status.lower() }}">
+                            {{ app.status }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="prediction-badge prediction-{{ app.prediction.lower() }}">
+                            {{ app.prediction }}
+                        </span>
+                    </td>
+                    <td>{{ (app.probability * 100)|round(1) }}%</td>
+                    <td>{{ app.created_at.strftime('%Y-%m-%d') }}</td>
+                    <td class="actions">
+                        <a href="/admin/application/{{ app.id }}" class="btn btn-view">
+                            <i>👁️</i> View
+                        </a>
+                        <a href="/admin/application/{{ app.id }}/delete" class="btn btn-delete" 
+                           onclick="return confirm('Are you sure you want to delete this application?');">
+                            <i>🗑️</i> 
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        <!-- Pagination -->
+        <div class="pagination">
+            <button class="pagination-button">«</button>
+            <button class="pagination-button active">1</button>
+            <button class="pagination-button">2</button>
+            <button class="pagination-button">3</button>
+            <button class="pagination-button">»</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        const table = document.querySelector('.applications-table');
+        const rows = table.querySelectorAll('tbody tr');
+        
+        searchInput.addEventListener('input', function() {
+            const searchText = this.value.toLowerCase();
+            
+            rows.forEach(row => {
+                const rowText = row.textContent.toLowerCase();
+                row.style.display = rowText.includes(searchText) ? '' : 'none';
+            });
+        });
+        
+        // Simple pagination example
+        document.querySelectorAll('.pagination-button').forEach(button => {
+            button.addEventListener('click', function() {
+                document.querySelector('.pagination-button.active').classList.remove('active');
+                this.classList.add('active');
+                // In a real app, this would fetch new page data
+            });
+        });
+        
+        // Export button functionality
+        document.querySelector('.export-button').addEventListener('click', function() {
+            alert('Export functionality would download a CSV of application data');
+            // This would trigger a backend export in a real app
+        });
+        
+        // Time filter functionality
+        document.querySelector('.time-filter').addEventListener('change', function() {
+            alert('Filtering applications for: ' + this.value);
+            // This would reload data with a time filter in a real app
+        });
+    });
+</script>
+{% endblock %}

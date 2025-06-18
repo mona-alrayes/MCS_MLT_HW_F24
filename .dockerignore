@@ -1,0 +1,29 @@
+# Add to root directory
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.DS_Store
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.ipynb_checkpoints
+.pytest_cache
+.mypy_cache
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+*.log
+*.sqlite
+*.db
+*.bak
+*.tmp
+# .dockerignore should NOT include:
+!static/
+!templates/
