@@ -1,0 +1,7 @@
+*.ipynb
+*.joblib
+*.pkl
+datasets/
+notebooks/
+__pycache__/
+.git/
